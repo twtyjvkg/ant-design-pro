@@ -7,6 +7,10 @@ export default [
       { path: '/user', redirect: '/user/login' },
       { path: '/user/login', component: './User/Login' },
       { path: '/user/register', component: './User/Register' },
+      {
+        path: '/user/reset-password',
+        component: './User/Reset',
+      },
       { path: '/user/register-result', component: './User/RegisterResult' },
     ],
   },
@@ -242,10 +246,6 @@ export default [
               {
                 path: '/account/settings/security',
                 component: './Account/Settings/SecurityView',
-              },
-              {
-                path: '/account/settings/binding',
-                component: './Account/Settings/BindingView',
               },
               {
                 path: '/account/settings/notification',

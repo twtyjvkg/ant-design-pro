@@ -70,7 +70,7 @@ class LoginPage extends Component {
             />
           </Tab>
           <div>
-            <Link to="">
+            <Link to="/user/reset-password">
               <FormattedMessage id="app.login.forgot-password" />
             </Link>
             <Link to="/user/register">

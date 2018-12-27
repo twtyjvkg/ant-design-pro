@@ -76,6 +76,11 @@ export default {
       changeOrigin: true,
       pathRewrite: { '^/api': '/api/v1' },
     },
+    '/media': {
+      target: 'http://localhost:8080/',
+      changeOrigin: true,
+      pathRewrite: { '^/media': '/media' },
+    },
   },
   ignoreMomentLocale: true,
   lessLoaderOptions: {
