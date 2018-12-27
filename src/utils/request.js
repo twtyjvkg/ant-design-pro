@@ -85,7 +85,8 @@ export default function request(url, option) {
   if (
     newOptions.method === 'POST' ||
     newOptions.method === 'PUT' ||
-    newOptions.method === 'DELETE'
+    newOptions.method === 'DELETE' ||
+    newOptions.method === 'PATCH'
   ) {
     if (!(newOptions.body instanceof FormData)) {
       newOptions.headers = {
@@ -101,6 +102,14 @@ export default function request(url, option) {
         ...newOptions.headers,
       };
     }
+  }
+
+  const token = localStorage.getItem('antd-cms-token');
+  if (token) {
+    newOptions.headers = {
+      Authorization: `JWT ${token}`,
+      ...newOptions.headers,
+    };
   }
 
   const expirys = options.expirys && 60;
