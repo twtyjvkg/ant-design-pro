@@ -3,12 +3,12 @@ import { connect } from 'dva';
 import { formatMessage, FormattedMessage } from 'umi/locale';
 import Link from 'umi/link';
 import router from 'umi/router';
-import { Form, Input, Button, Select, Row, Col, Popover, Progress } from 'antd';
+import { Form, Input, Button, Row, Col, Popover, Progress, message } from 'antd';
+import reqwest from 'reqwest';
+
 import styles from './Register.less';
 
 const FormItem = Form.Item;
-const { Option } = Select;
-const InputGroup = Input.Group;
 
 const passwordStatusMap = {
   ok: (
@@ -34,47 +34,79 @@ const passwordProgressMap = {
   poor: 'exception',
 };
 
-@connect(({ register, loading }) => ({
-  register,
-  submitting: loading.effects['register/submit'],
+@connect(({ login }) => ({
+  login,
 }))
 @Form.create()
 class Register extends Component {
   state = {
+    submitting: false,
     count: 0,
     confirmDirty: false,
     visible: false,
     help: '',
-    prefix: '86',
   };
-
-  componentDidUpdate() {
-    const { form, register } = this.props;
-    const account = form.getFieldValue('mail');
-    if (register.status === 'ok') {
-      router.push({
-        pathname: '/user/register-result',
-        state: {
-          account,
-        },
-      });
-    }
-  }
 
   componentWillUnmount() {
     clearInterval(this.interval);
   }
 
+  handleEmail = e => {
+    e.target.value = e.target.value.replace(/@[^@]*/, '');
+  };
+
   onGetCaptcha = () => {
-    let count = 59;
-    this.setState({ count });
-    this.interval = setInterval(() => {
-      count -= 1;
-      this.setState({ count });
-      if (count === 0) {
-        clearInterval(this.interval);
-      }
-    }, 1000);
+    const { form } = this.props;
+    form.validateFieldsAndScroll(['email'], (errors, values) => {
+      if (errors) return;
+      const mail = `${values.email}@hand-china.com`;
+      reqwest({
+        url: `/api/cms/email_code`,
+        type: 'json',
+        method: 'post',
+        data: {
+          email: mail,
+        },
+        success: () => {
+          message.success(`验证码已发送至邮箱：${mail},请查收！`);
+          let count = 59;
+          this.setState({ count });
+          this.interval = setInterval(() => {
+            count -= 1;
+            this.setState({ count });
+            if (count === 0) {
+              clearInterval(this.interval);
+            }
+          }, 1000);
+        },
+        error: err => {
+          switch (err.status) {
+            case 500:
+              message.error('服务器错误');
+              break;
+            case 400: {
+              const { code, email, error } = JSON.parse(err.responseText);
+              form.setFields({
+                email: {
+                  value: values.email,
+                  errors: email ? [new Error(email[0])] : '',
+                },
+                captcha: {
+                  errors: code ? [new Error(code[0])] : '',
+                },
+              });
+              if (error && error.message) {
+                message.error(error.message);
+              }
+              break;
+            }
+            default:
+              message.error(err.responseText);
+              break;
+          }
+        },
+      });
+    });
   };
 
   getPasswordStatus = () => {
@@ -91,25 +123,61 @@ class Register extends Component {
 
   handleSubmit = e => {
     e.preventDefault();
-    const { form, dispatch } = this.props;
-    form.validateFields({ force: true }, (err, values) => {
-      if (!err) {
-        const { prefix } = this.state;
-        dispatch({
-          type: 'register/submit',
-          payload: {
-            ...values,
-            prefix,
-          },
-        });
-      }
+    const { form } = this.props;
+    form.validateFields({ force: true }, (errors, values) => {
+      if (errors) return;
+      this.setState({
+        submitting: true,
+      });
+      reqwest({
+        url: `/api/account/users`,
+        type: 'json',
+        method: 'post',
+        data: {
+          username: values.email,
+          email: `${values.email}@hand-china.com`,
+          code: values.captcha,
+          password: values.password,
+        },
+        success: res => {
+          if (res.token) {
+            localStorage.setItem('antd-cms-token', res.token);
+            router.push({
+              pathname: '/user/register-result',
+              state: {
+                account: res.email,
+              },
+            });
+          }
+        },
+        error: err => {
+          this.setState({
+            submitting: false,
+          });
+          switch (err.status) {
+            case 500:
+              message.error('服务器错误');
+              break;
+            case 400: {
+              const { code, email } = JSON.parse(err.responseText);
+              form.setFields({
+                email: {
+                  value: values.email,
+                  errors: email ? [new Error(email[0])] : '',
+                },
+                captcha: {
+                  errors: code ? [new Error(code[0])] : '',
+                },
+              });
+              break;
+            }
+            default:
+              message.error(err.responseText);
+              break;
+          }
+        },
+      });
     });
-  };
-
-  handleConfirmBlur = e => {
-    const { value } = e.target;
-    const { confirmDirty } = this.state;
-    this.setState({ confirmDirty: confirmDirty || !!value });
   };
 
   checkConfirm = (rule, value, callback) => {
@@ -150,12 +218,6 @@ class Register extends Component {
     }
   };
 
-  changePrefix = value => {
-    this.setState({
-      prefix: value,
-    });
-  };
-
   renderPasswordProgress = () => {
     const { form } = this.props;
     const value = form.getFieldValue('password');
@@ -174,29 +236,38 @@ class Register extends Component {
   };
 
   render() {
-    const { form, submitting } = this.props;
+    const { form } = this.props;
     const { getFieldDecorator } = form;
-    const { count, prefix, help, visible } = this.state;
+    const { count, help, visible, submitting } = this.state;
     return (
       <div className={styles.main}>
-        <h3>
+        <h3 align="center">
           <FormattedMessage id="app.register.register" />
         </h3>
         <Form onSubmit={this.handleSubmit}>
           <FormItem>
-            {getFieldDecorator('mail', {
+            {getFieldDecorator('email', {
               rules: [
                 {
                   required: true,
                   message: formatMessage({ id: 'validation.email.required' }),
                 },
                 {
-                  type: 'email',
-                  message: formatMessage({ id: 'validation.email.wrong-format' }),
+                  pattern: /\w+([-+.]\w+)*@hand-china.com+$/,
+                  message: formatMessage({ id: 'validation.email.hand' }),
+                  transform(value) {
+                    return value ? `${value.replace(/@[^@]*/, '')}@hand-china.com` : value;
+                  },
                 },
               ],
+              validateTrigger: 'onBlur',
             })(
-              <Input size="large" placeholder={formatMessage({ id: 'form.email.placeholder' })} />
+              <Input
+                size="large"
+                onKeyUp={this.handleEmail}
+                addonAfter="@hand-china.com"
+                placeholder={formatMessage({ id: 'form.email.placeholder' })}
+              />
             )}
           </FormItem>
           <FormItem help={help}>
@@ -248,37 +319,6 @@ class Register extends Component {
                 placeholder={formatMessage({ id: 'form.confirm-password.placeholder' })}
               />
             )}
-          </FormItem>
-          <FormItem>
-            <InputGroup compact>
-              <Select
-                size="large"
-                value={prefix}
-                onChange={this.changePrefix}
-                style={{ width: '20%' }}
-              >
-                <Option value="86">+86</Option>
-                <Option value="87">+87</Option>
-              </Select>
-              {getFieldDecorator('mobile', {
-                rules: [
-                  {
-                    required: true,
-                    message: formatMessage({ id: 'validation.phone-number.required' }),
-                  },
-                  {
-                    pattern: /^\d{11}$/,
-                    message: formatMessage({ id: 'validation.phone-number.wrong-format' }),
-                  },
-                ],
-              })(
-                <Input
-                  size="large"
-                  style={{ width: '80%' }}
-                  placeholder={formatMessage({ id: 'form.phone-number.placeholder' })}
-                />
-              )}
-            </InputGroup>
           </FormItem>
           <FormItem>
             <Row gutter={8}>

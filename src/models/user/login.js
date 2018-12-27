@@ -1,6 +1,6 @@
 import { routerRedux } from 'dva/router';
 import { stringify } from 'qs';
-import { fakeAccountLogin, getFakeCaptcha } from '@/services/api';
+import { accountLogin } from '@/services/user/login';
 import { setAuthority } from '@/utils/authority';
 import { getPageQuery } from '@/utils/utils';
 import { reloadAuthorized } from '@/utils/Authorized';
@@ -14,14 +14,20 @@ export default {
 
   effects: {
     *login({ payload }, { call, put }) {
-      const response = yield call(fakeAccountLogin, payload);
+      const response = yield call(accountLogin, payload);
       yield put({
         type: 'changeLoginStatus',
-        payload: response,
+        payload: {
+          status: response.token ? 'ok' : 'error',
+          type: 'account',
+          currentAuthority: response.authority,
+        },
       });
       // Login successfully
-      if (response.status === 'ok') {
+      if (typeof response.token === 'string') {
         reloadAuthorized();
+        localStorage.setItem('antd-cms-token', response.token);
+
         const urlParams = new URL(window.location.href);
         const params = getPageQuery();
         let { redirect } = params;
@@ -41,10 +47,6 @@ export default {
       }
     },
 
-    *getCaptcha({ payload }, { call }) {
-      yield call(getFakeCaptcha, payload);
-    },
-
     *logout(_, { put }) {
       yield put({
         type: 'changeLoginStatus',
@@ -54,6 +56,7 @@ export default {
         },
       });
       reloadAuthorized();
+      localStorage.removeItem('antd-cms-token');
       yield put(
         routerRedux.push({
           pathname: '/user/login',
