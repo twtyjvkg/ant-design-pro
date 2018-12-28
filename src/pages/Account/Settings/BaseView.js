@@ -86,7 +86,7 @@ class BaseView extends Component {
                     message: formatMessage({ id: 'app.settings.basic.email-message' }, {}),
                   },
                 ],
-              })(<Input />)}
+              })(<Input readOnly />)}
             </FormItem>
             <FormItem label={formatMessage({ id: 'app.settings.basic.nickname' })}>
               {getFieldDecorator('username', {

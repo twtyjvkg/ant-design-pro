@@ -6,7 +6,6 @@ import groupBy from 'lodash/groupBy';
 import NoticeIcon from '../NoticeIcon';
 import HeaderSearch from '../HeaderSearch';
 import HeaderDropdown from '../HeaderDropdown';
-import SelectLang from '../SelectLang';
 import styles from './index.less';
 
 export default class GlobalHeaderRight extends PureComponent {
@@ -179,13 +178,12 @@ export default class GlobalHeaderRight extends PureComponent {
                 }
                 alt="avatar"
               />
-              <span className={styles.name}>{currentUser.username}</span>
+              <span className={styles.name}>{currentUser.real_name || currentUser.username}</span>
             </span>
           </HeaderDropdown>
         ) : (
           <Spin size="small" style={{ marginLeft: 8, marginRight: 8 }} />
         )}
-        <SelectLang className={styles.action} />
       </div>
     );
   }
