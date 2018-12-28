@@ -18,6 +18,7 @@ export default {
     '系统管理员已收到您的注册申请，审核结果将以邮件形式发送到您的注册邮箱，请注意查收。',
   'app.register-result.back-home': '返回首页',
   'app.register-result.view-mailbox': '查看邮箱',
+  'app.reset.back-login': '返回登录页面',
   'validation.email.required': '请输入邮箱地址！',
   'validation.email.hand': '请输入汉得邮箱！',
   'validation.email.wrong-format': '邮箱地址格式错误！',

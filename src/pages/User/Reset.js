@@ -1,12 +1,29 @@
 import React, { PureComponent } from 'react';
 import { formatMessage, FormattedMessage } from 'umi/locale';
-import { Button, Form, Input, message, Steps, Icon, Popover, Progress } from 'antd';
+import { Button, Form, Input, message, Steps, Icon, Popover, Progress, Row, Col } from 'antd';
+import Link from 'umi/link';
+import Result from '@/components/Result';
 import reqwest from 'reqwest';
 
 import styles from './Reset.less';
 
 const { Step } = Steps;
 const FormItem = Form.Item;
+
+const actions = (
+  <div className={styles.actions}>
+    <Link to="/user/login">
+      <Button type="primary">
+        <FormattedMessage id="app.reset.back-login" />
+      </Button>
+    </Link>
+    <Link to="/">
+      <Button>
+        <FormattedMessage id="app.register-result.back-home" />
+      </Button>
+    </Link>
+  </div>
+);
 
 const passwordStatusMap = {
   ok: (
@@ -36,11 +53,12 @@ const passwordProgressMap = {
 class ResetPassword extends PureComponent {
   state = {
     count: 0,
-    current: 1,
+    current: 0,
     status: 'process',
     emailSubmitting: false,
     confirmDirty: false,
     visible: false,
+    submitting: false,
     help: '',
   };
 
@@ -152,6 +170,63 @@ class ResetPassword extends PureComponent {
     }
   };
 
+  handleSubmit = e => {
+    e.preventDefault();
+    const { form } = this.props;
+    form.validateFields({ force: true }, (errors, values) => {
+      if (errors) return;
+      this.setState({
+        submitting: true,
+      });
+      reqwest({
+        url: `/api/account/password_reset`,
+        type: 'json',
+        method: 'post',
+        data: {
+          email: `${values.email}@hand-china.com`,
+          code: values.captcha,
+          password: values.password,
+        },
+        success: res => {
+          if (res.status === 'ok') {
+            this.setState({
+              current: 2,
+              status: 'finish',
+              submitting: false,
+            });
+          }
+        },
+        error: err => {
+          this.setState({
+            submitting: false,
+            status: 'error',
+          });
+          switch (err.status) {
+            case 500:
+              message.error('服务器错误');
+              break;
+            case 400: {
+              const { code, email } = JSON.parse(err.responseText);
+              form.setFields({
+                email: {
+                  value: values.email,
+                  errors: email ? [new Error(email[0])] : '',
+                },
+                captcha: {
+                  errors: code ? [new Error(code[0])] : '',
+                },
+              });
+              break;
+            }
+            default:
+              message.error(err.responseText);
+              break;
+          }
+        },
+      });
+    });
+  };
+
   checkPassword = (rule, value, callback) => {
     const { visible, confirmDirty } = this.state;
     if (!value) {
@@ -202,7 +277,7 @@ class ResetPassword extends PureComponent {
     const {
       form: { getFieldDecorator },
     } = this.props;
-    const { current, count, status, emailSubmitting, help, visible } = this.state;
+    const { current, count, status, emailSubmitting, help, visible, submitting } = this.state;
 
     return (
       <div className={styles.main}>
@@ -210,34 +285,37 @@ class ResetPassword extends PureComponent {
         <Steps current={current} status={status}>
           <Step title="邮箱验证" icon={<Icon type="mail" />} />
           <Step title="密码重置" icon={<Icon type="solution" />} />
-          <Step title="完成" />
+          <Step title="完成" icon={<Icon type="smile-o" />} />
         </Steps>
-        <Form className={styles.resetForm}>
-          <FormItem>
-            {getFieldDecorator('email', {
-              rules: [
-                {
-                  required: true,
-                  message: formatMessage({ id: 'validation.email.required' }),
-                },
-                {
-                  pattern: /\w+([-+.]\w+)*@hand-china.com+$/,
-                  message: '请输入汉得邮箱',
-                  transform(value) {
-                    return value ? `${value.replace(/@[^@]*/, '')}@hand-china.com` : value;
+        <Form className={styles.resetForm} onSubmit={this.handleSubmit}>
+          {current !== 2 && (
+            <FormItem>
+              {getFieldDecorator('email', {
+                rules: [
+                  {
+                    required: true,
+                    message: formatMessage({ id: 'validation.email.required' }),
                   },
-                },
-              ],
-              validateTrigger: 'onBlur',
-            })(
-              <Input
-                size="large"
-                onKeyUp={this.handleEmail}
-                addonAfter="@hand-china.com"
-                placeholder={formatMessage({ id: 'form.email.placeholder' })}
-              />
-            )}
-          </FormItem>
+                  {
+                    pattern: /\w+([-+.]\w+)*@hand-china.com+$/,
+                    message: '请输入汉得邮箱',
+                    transform(value) {
+                      return value ? `${value.replace(/@[^@]*/, '')}@hand-china.com` : value;
+                    },
+                  },
+                ],
+                validateTrigger: 'onBlur',
+              })(
+                <Input
+                  size="large"
+                  onKeyUp={this.handleEmail}
+                  addonAfter="@hand-china.com"
+                  placeholder={formatMessage({ id: 'form.email.placeholder' })}
+                  readOnly={current === 1}
+                />
+              )}
+            </FormItem>
+          )}
           {current === 1 && (
             <FormItem help={help}>
               <Popover
@@ -292,6 +370,39 @@ class ResetPassword extends PureComponent {
               )}
             </FormItem>
           )}
+          {current === 1 && (
+            <FormItem>
+              <Row gutter={8}>
+                <Col span={16}>
+                  {getFieldDecorator('captcha', {
+                    rules: [
+                      {
+                        required: true,
+                        message: formatMessage({ id: 'validation.verification-code.required' }),
+                      },
+                    ],
+                  })(
+                    <Input
+                      size="large"
+                      placeholder={formatMessage({ id: 'form.verification-code.placeholder' })}
+                    />
+                  )}
+                </Col>
+                <Col span={8}>
+                  <Button
+                    size="large"
+                    disabled={count}
+                    className={styles.getCaptcha}
+                    onClick={this.onGetCaptcha}
+                  >
+                    {count
+                      ? `${count} s`
+                      : formatMessage({ id: 'app.register.get-verification-code' })}
+                  </Button>
+                </Col>
+              </Row>
+            </FormItem>
+          )}
           {current === 0 && (
             <FormItem>
               <Button
@@ -308,13 +419,21 @@ class ResetPassword extends PureComponent {
           )}
           {current === 1 && (
             <div style={{ paddingLeft: '10%', paddingRight: '10%' }}>
-              <Button style={{ float: 'left' }} size="large" onClick={this.preStep}>
+              <Button style={{ float: 'left' }} onClick={this.preStep}>
                 上一步
               </Button>
-              <Button type="primary" style={{ float: 'right' }} size="large">
+              <Button
+                type="primary"
+                style={{ float: 'right' }}
+                loading={submitting}
+                htmlType="submit"
+              >
                 提交
               </Button>
             </div>
+          )}
+          {current === 2 && (
+            <Result className={styles.resetResult} description="密码重置成功" actions={actions} />
           )}
         </Form>
       </div>
