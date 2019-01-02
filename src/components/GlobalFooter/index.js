@@ -2,7 +2,7 @@ import React from 'react';
 import classNames from 'classnames';
 import styles from './index.less';
 
-const GlobalFooter = ({ className, links, copyright }) => {
+const GlobalFooter = ({ className, links, beian, copyright }) => {
   const clsString = classNames(styles.globalFooter, className);
   return (
     <footer className={clsString}>
@@ -20,6 +20,7 @@ const GlobalFooter = ({ className, links, copyright }) => {
           ))}
         </div>
       )}
+      {beian && <div className={styles.beian}>{beian}</div>}
       {copyright && <div className={styles.copyright}>{copyright}</div>}
     </footer>
   );

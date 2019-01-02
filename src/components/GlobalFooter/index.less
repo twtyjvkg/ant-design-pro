@@ -22,6 +22,28 @@
     }
   }
 
+  .beian {
+    color: @text-color-secondary;
+    font-size: @font-size-base;
+
+    img {
+      margin-right: 2px;
+    }
+
+    a {
+      color: @text-color-secondary;
+      transition: all 0.3s;
+
+      &:not(:last-child) {
+        margin-right: 15px;
+      }
+
+      &:hover {
+        color: @text-color;
+      }
+    }
+  }
+
   .copyright {
     color: @text-color-secondary;
     font-size: @font-size-base;
