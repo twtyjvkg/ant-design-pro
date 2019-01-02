@@ -259,6 +259,41 @@ export default [
               },
             ],
           },
+          // system
+          {
+            name: 'system',
+            icon: 'setting',
+            path: '/console/system',
+            routes: [
+              {
+                name: 'account',
+                path: '/console/system/account',
+                component: './System/Account/Account',
+                routes: [
+                  {
+                    path: '/console/system/account',
+                    redirect: '/console/system/account/users',
+                  },
+                  {
+                    path: '/console/system/account/users',
+                    component: './System/Account/User/UserList',
+                  },
+                  {
+                    path: '/console/system/account/groups',
+                    component: './System/Account/Group/GroupList',
+                  },
+                  {
+                    path: '/console/system/account/permissions',
+                    component: './System/Account/Permission/PermissionList',
+                  },
+                  {
+                    path: '/console/system/account/roles',
+                    component: './System/Account/Role/RoleList',
+                  },
+                ],
+              },
+            ],
+          },
           {
             component: '404',
           },

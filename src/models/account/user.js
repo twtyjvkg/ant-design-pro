@@ -1,6 +1,8 @@
 import {
-  query as queryUsers,
+  queryUserList,
   queryCurrent,
+  updateUser,
+  deleteUser,
   updateCurrent,
   ModifyPassword,
 } from '@/services/account/user';
@@ -9,17 +11,39 @@ export default {
   namespace: 'user',
 
   state: {
-    list: [],
+    userList: {
+      list: [],
+      count: 0,
+    },
     currentUser: {},
   },
 
   effects: {
-    *fetch(_, { call, put }) {
-      const response = yield call(queryUsers);
+    *fetchUser({ payload }, { call, put }) {
+      const response = yield call(queryUserList, payload);
       yield put({
-        type: 'save',
-        payload: response,
+        type: 'queryUser',
+        payload: {
+          /* eslint-disable */
+          list: Array.isArray(response.results)
+            ? response.results
+            : Array.isArray(response)
+            ? response
+            : [],
+          /* eslint-disable */
+          count: response.count || response.length,
+        },
       });
+    },
+
+    *updateUser({ payload, callback }, { call }) {
+      const response = yield call(updateUser, payload);
+      if (callback) callback(response);
+    },
+
+    *deleteUser({ payload, callback }, { call }) {
+      const response = yield call(deleteUser, payload);
+      if (callback) callback(response);
     },
 
     *fetchCurrent(_, { call, put }) {
@@ -45,6 +69,12 @@ export default {
   },
 
   reducers: {
+    queryUser(state, action) {
+      return {
+        ...state,
+        userList: action.payload,
+      };
+    },
     save(state, action) {
       return {
         ...state,
