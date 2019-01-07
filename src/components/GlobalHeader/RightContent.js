@@ -62,13 +62,30 @@ export default class GlobalHeaderRight extends PureComponent {
     });
   };
 
+  fetchMoreNotices = tabProps => {
+    const { list, name } = tabProps;
+    const { dispatch, notices = [] } = this.props;
+    const lastItemId = notices[notices.length - 1].id;
+    dispatch({
+      type: 'global/fetchMoreNotices',
+      payload: {
+        lastItemId,
+        type: name,
+        offset: list.length,
+      },
+    });
+  };
+
   render() {
     const {
       currentUser,
+      fetchingMoreNotices,
       fetchingNotices,
+      loadedAllNotices,
       onNoticeVisibleChange,
       onMenuClick,
       onNoticeClear,
+      skeletonCount,
       theme,
     } = this.props;
     const menu = (
@@ -92,6 +109,11 @@ export default class GlobalHeaderRight extends PureComponent {
         </Menu.Item>
       </Menu>
     );
+    const loadMoreProps = {
+      skeletonCount,
+      loadedAll: loadedAllNotices,
+      loading: fetchingMoreNotices,
+    };
     const noticeData = this.getNoticeData();
     const unreadMsg = this.getUnreadData(noticeData);
     let className = styles.right;
@@ -135,8 +157,11 @@ export default class GlobalHeaderRight extends PureComponent {
           locale={{
             emptyText: formatMessage({ id: 'component.noticeIcon.empty' }),
             clear: formatMessage({ id: 'component.noticeIcon.clear' }),
+            loadedAll: formatMessage({ id: 'component.noticeIcon.loaded' }),
+            loadMore: formatMessage({ id: 'component.noticeIcon.loading-more' }),
           }}
           onClear={onNoticeClear}
+          onLoadMore={this.fetchMoreNotices}
           onPopupVisibleChange={onNoticeVisibleChange}
           loading={fetchingNotices}
           clearClose
@@ -148,6 +173,7 @@ export default class GlobalHeaderRight extends PureComponent {
             name="notification"
             emptyText={formatMessage({ id: 'component.globalHeader.notification.empty' })}
             emptyImage="https://gw.alipayobjects.com/zos/rmsportal/wAhyIChODzsoKIOBHcBk.svg"
+            {...loadMoreProps}
           />
           <NoticeIcon.Tab
             count={unreadMsg.message}
@@ -156,6 +182,7 @@ export default class GlobalHeaderRight extends PureComponent {
             name="message"
             emptyText={formatMessage({ id: 'component.globalHeader.message.empty' })}
             emptyImage="https://gw.alipayobjects.com/zos/rmsportal/sAuJeJzSKbUmHfBQRzmZ.svg"
+            {...loadMoreProps}
           />
           <NoticeIcon.Tab
             count={unreadMsg.event}
@@ -164,6 +191,7 @@ export default class GlobalHeaderRight extends PureComponent {
             name="event"
             emptyText={formatMessage({ id: 'component.globalHeader.event.empty' })}
             emptyImage="https://gw.alipayobjects.com/zos/rmsportal/HsIsxMZiWKrNUavQUXqx.svg"
+            {...loadMoreProps}
           />
         </NoticeIcon>
         {currentUser.username ? (
