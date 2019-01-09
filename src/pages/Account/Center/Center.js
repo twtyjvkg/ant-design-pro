@@ -35,12 +35,6 @@ class Center extends PureComponent {
       case 'articles':
         router.push(`${match.url}/articles`);
         break;
-      case 'applications':
-        router.push(`${match.url}/applications`);
-        break;
-      case 'projects':
-        router.push(`${match.url}/projects`);
-        break;
       default:
         break;
     }
@@ -54,26 +48,10 @@ class Center extends PureComponent {
         key: 'articles',
         tab: (
           <span>
-            文章 <span style={{ fontSize: 14 }}>(8)</span>
+            文章 <span style={{ fontSize: 14 }}>({currentUser.article_count})</span>
           </span>
         ),
       },
-      // {
-      //   key: 'applications',
-      //   tab: (
-      //     <span>
-      //       应用 <span style={{ fontSize: 14 }}>(8)</span>
-      //     </span>
-      //   ),
-      // },
-      // {
-      //   key: 'projects',
-      //   tab: (
-      //     <span>
-      //       项目 <span style={{ fontSize: 14 }}>(8)</span>
-      //     </span>
-      //   ),
-      // },
     ];
 
     return (

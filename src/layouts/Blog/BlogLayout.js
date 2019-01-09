@@ -18,7 +18,7 @@ import Header from './BlogHeader';
 
 import styles from './BlogLayout.less';
 
-import logo from '../../assets/logo.svg';
+import logo from '../../assets/logo.png';
 // lazy load SettingDrawer
 const SettingDrawer = React.lazy(() => import('@/components/SettingDrawer'));
 

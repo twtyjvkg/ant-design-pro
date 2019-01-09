@@ -292,6 +292,29 @@ export default [
                   },
                 ],
               },
+              {
+                name: 'blog',
+                path: '/console/system/blog',
+                component: './System/Blog/blog',
+                routes: [
+                  {
+                    path: '/console/system/blog',
+                    redirect: '/console/system/blog/category',
+                  },
+                  {
+                    path: '/console/system/blog/category',
+                    component: './System/Blog/Category/CategoryList',
+                  },
+                  {
+                    path: '/console/system/blog/article',
+                    component: './System/Blog/Article/ArticleList',
+                  },
+                  {
+                    path: '/console/system/blog/tag',
+                    component: './System/Blog/Tag/TagList',
+                  },
+                ],
+              },
             ],
           },
           {
@@ -305,11 +328,18 @@ export default [
         component: '../layouts/Blog/BlogLayout',
         Routes: ['src/pages/Authorized'],
         routes: [
-          { path: '/blog', redirect: '/blog/home' },
+          { path: '/blog', redirect: '/blog/maintain' },
           {
             path: '/blog/home',
-            name: 'blog',
             component: './Blog/Home/BlogHome',
+          },
+          {
+            path: '/blog/article/add',
+            component: './Blog/Article/ArticleAdd',
+          },
+          {
+            path: '/blog/maintain',
+            component: './Blog/Maintain/Maintain',
           },
         ],
       },

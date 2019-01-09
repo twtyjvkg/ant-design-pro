@@ -37,4 +37,5 @@ export default {
   'menu.account.logout': '退出登录',
   'menu.system': '系统设置',
   'menu.system.account': '账户管理',
+  'menu.system.blog': '博客管理',
 };

@@ -33,7 +33,7 @@ class TopNavHeader extends PureComponent {
             <div className={styles.logo} key="logo" id="logo">
               <Link to="/">
                 <img src={logo} alt="logo" />
-                <h1>断线的风筝</h1>
+                <h1>徐昭的个人博客</h1>
               </Link>
             </div>
             <div
