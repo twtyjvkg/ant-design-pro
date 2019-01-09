@@ -19,6 +19,7 @@ import Header from './BlogHeader';
 import styles from './BlogLayout.less';
 
 import logo from '../../assets/logo.png';
+import { title } from '../../defaultSettings';
 // lazy load SettingDrawer
 const SettingDrawer = React.lazy(() => import('@/components/SettingDrawer'));
 
@@ -82,14 +83,14 @@ class BlogLayout extends React.PureComponent {
     const currRouterData = this.matchParamsPath(pathname, breadcrumbNameMap);
 
     if (!currRouterData) {
-      return '断线的风筝';
+      return title;
     }
     const pageName = formatMessage({
       id: currRouterData.locale || currRouterData.name,
       defaultMessage: currRouterData.name,
     });
 
-    return `${pageName} - 断线的风筝`;
+    return `${pageName} - ${title}`;
   };
 
   renderSettingDrawer = () => {

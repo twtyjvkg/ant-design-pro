@@ -38,14 +38,14 @@ export default {
     *submitArticle({ payload, callback }, { call, put }) {
       yield call(submitArticle, payload);
       if (callback) callback();
-      const response = yield call(queryArticleList);
-      yield put({
-        type: 'queryArticle',
-        payload: {
-          list: Array.isArray(response.results) ? response.results : [],
-          count: response.count,
-        },
-      });
+      // const response = yield call(queryArticleList);
+      // yield put({
+      //   type: 'queryArticle',
+      //   payload: {
+      //     list: Array.isArray(response.results) ? response.results : [],
+      //     count: response.count,
+      //   },
+      // });
     },
     *validateArticleTitle({ payload, callback }, { call }) {
       const response = yield call(validateTitle, payload);

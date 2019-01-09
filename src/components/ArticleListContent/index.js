@@ -3,15 +3,26 @@ import moment from 'moment';
 import { Avatar } from 'antd';
 import styles from './index.less';
 
-const ArticleListContent = ({ data: { content, updatedAt, avatar, owner, href } }) => (
+/* eslint-disable */
+const ArticleListContent = ({
+  data: {
+    body,
+    publish_time,
+    author,
+    href,
+    category: { level1, level2, level3 },
+  },
+}) => (
   <div className={styles.listContent}>
-    <div className={styles.description}>{content}</div>
+    <div className={styles.description}>{body}</div>
     <div className={styles.extra}>
-      <Avatar src={avatar} size="small" />
-      <a href={href}>{owner}</a> 发布在 <a href={href}>{href}</a>
-      <em>{moment(updatedAt).format('YYYY-MM-DD HH:mm')}</em>
+      <Avatar src={author.avatar} size="small" />
+      <a href={href}>{author.name}</a> 发布在{' '}
+      <a href={href}>{`${level1.label}/${level2.label}/${level3.label}`}</a>
+      <em>{moment(publish_time).format('YYYY-MM-DD HH:mm')}</em>
     </div>
   </div>
 );
+/* eslint-disable */
 
 export default ArticleListContent;

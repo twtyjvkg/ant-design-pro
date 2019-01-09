@@ -7,10 +7,17 @@ import ArticleListContent from '@/components/ArticleListContent';
 
 import styles from './Articles.less';
 
-@connect(({ list }) => ({
-  list,
+@connect(({ article }) => ({
+  article,
 }))
 class Center extends PureComponent {
+  componentDidMount() {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'article/fetchArticle',
+    });
+  }
+
   addArticle = e => {
     e.preventDefault();
     router.push('/blog/article/add');
@@ -18,7 +25,7 @@ class Center extends PureComponent {
 
   render() {
     const {
-      list: { list },
+      article: { articleList },
     } = this.props;
     const IconText = ({ type, text }) => (
       <span>
@@ -41,16 +48,9 @@ class Center extends PureComponent {
           className={styles.articleList}
           rowKey="id"
           itemLayout="vertical"
-          dataSource={list}
+          dataSource={articleList.list}
           renderItem={item => (
-            <List.Item
-              key={item.id}
-              actions={[
-                <IconText type="star-o" text={item.star} />,
-                <IconText type="like-o" text={item.like} />,
-                <IconText type="message" text={item.message} />,
-              ]}
-            >
+            <List.Item key={item.id} actions={[<IconText type="eye-o" text={item.views} />]}>
               <List.Item.Meta
                 title={
                   <a className={styles.listItemMetaTitle} href={item.href}>
@@ -59,9 +59,9 @@ class Center extends PureComponent {
                 }
                 description={
                   <span>
-                    <Tag>Ant Design</Tag>
-                    <Tag>设计语言</Tag>
-                    <Tag>蚂蚁金服</Tag>
+                    {item.tags.map(tag => (
+                      <Tag key={tag.id}>{tag.name}</Tag>
+                    ))}
                   </span>
                 }
               />

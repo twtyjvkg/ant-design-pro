@@ -69,16 +69,15 @@ class ArticleAdd extends PureComponent {
         return;
       }
       dispatch({
-        type: 'article/submitArticleForm',
+        type: 'article/submitArticle',
         payload: { ...fieldsValue },
         callback: () => {
-          router.push('/blog/article/list');
+          router.push('/console/account/center/articles');
         },
       });
     });
   };
 
-  /* eslint-disable */
   handleAttachmentChange = info => {
     let fileList = info.fileList;
     fileList = fileList.slice(-2);
@@ -95,7 +94,6 @@ class ArticleAdd extends PureComponent {
       return false;
     });
   };
-  /* eslint-disable */
 
   render() {
     const {
