@@ -8,7 +8,7 @@ import GlobalHeader from '@/components/GlobalHeader';
 
 import styles from './BlogHeader.less';
 
-const { Header: BlogHeader } = Layout;
+const { Header } = Layout;
 
 class HeaderView extends PureComponent {
   state = {
@@ -66,13 +66,13 @@ class HeaderView extends PureComponent {
     const { navTheme, fixedHeader } = setting;
     const { visible } = this.state;
     const HeaderDom = visible ? (
-      <BlogHeader style={{ padding: 0 }} className={fixedHeader ? styles.fixedHeader : ''}>
+      <Header style={{ padding: 0 }} className={fixedHeader ? styles.fixedHeader : ''}>
         {!isMobile ? (
           <TopNavHeader mode="horizontal" theme={navTheme} {...this.props} />
         ) : (
           <GlobalHeader {...this.props} />
         )}
-      </BlogHeader>
+      </Header>
     ) : null;
     return (
       <Animate component="" transitionName="fade">

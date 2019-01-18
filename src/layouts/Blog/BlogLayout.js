@@ -13,8 +13,9 @@ import pathToRegexp from 'path-to-regexp';
 import PageLoading from '@/components/PageLoading';
 
 import Context from '../MenuContext';
-import BlogFooter from './BlogFooter';
+import Footer from './BlogFooter';
 import Header from './BlogHeader';
+import Sider from './BlogSider';
 
 import styles from './BlogLayout.less';
 
@@ -125,8 +126,9 @@ class BlogLayout extends React.PureComponent {
             <Content className={styles.content} style={contentStyle}>
               {children}
             </Content>
+            <Sider width="20%" />
           </Layout>
-          <BlogFooter />
+          <Footer />
         </Layout>
       </Layout>
     );

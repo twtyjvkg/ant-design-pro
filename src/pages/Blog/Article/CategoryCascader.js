@@ -182,7 +182,7 @@ class CategoryCascader extends PureComponent {
         return;
       }
       dispatch({
-        type: 'category/submitCategoryForm',
+        type: 'category/submitCategory',
         payload: {
           id,
           name: fieldsValue.level3,
@@ -308,6 +308,7 @@ class CategoryCascader extends PureComponent {
               placeholder={formatMessage({ id: 'form.article.category.placeholder.level3' })}
             />
           )}
+          <span style={{ color: '#f00' }}>如需添加一二级目录请联系管理员</span>
         </FormItem>
       </Form>
     );
