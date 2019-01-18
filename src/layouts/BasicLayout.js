@@ -17,7 +17,8 @@ import Context from './MenuContext';
 import Exception403 from '../pages/Exception/403';
 import PageLoading from '@/components/PageLoading';
 import SiderMenu from '@/components/SiderMenu';
-import { title } from '../defaultSettings';
+import { menu, title } from '../defaultSettings';
+
 import styles from './BasicLayout.less';
 
 // lazy load SettingDrawer
@@ -99,7 +100,7 @@ class BasicLayout extends React.PureComponent {
   getRouterAuthority = (pathname, routeData) => {
     let routeAuthority = ['noAuthority'];
     const getAuthority = (key, routes) => {
-      routes.map(route => {
+      routes.forEach(route => {
         if (route.path && pathToRegexp(route.path).test(key)) {
           routeAuthority = route.authority;
         } else if (route.routes) {
@@ -118,10 +119,12 @@ class BasicLayout extends React.PureComponent {
     if (!currRouterData) {
       return title;
     }
-    const pageName = formatMessage({
-      id: currRouterData.locale || currRouterData.name,
-      defaultMessage: currRouterData.name,
-    });
+    const pageName = menu.disableLocal
+      ? currRouterData.name
+      : formatMessage({
+          id: currRouterData.locale || currRouterData.name,
+          defaultMessage: currRouterData.name,
+        });
 
     return `${pageName} - ${title}`;
   };
@@ -220,11 +223,11 @@ class BasicLayout extends React.PureComponent {
   }
 }
 
-export default connect(({ global, setting, menu }) => ({
+export default connect(({ global, setting, menu: menuModel }) => ({
   collapsed: global.collapsed,
   layout: setting.layout,
-  menuData: menu.menuData,
-  breadcrumbNameMap: menu.breadcrumbNameMap,
+  menuData: menuModel.menuData,
+  breadcrumbNameMap: menuModel.breadcrumbNameMap,
   ...setting,
 }))(props => (
   <Media query="(max-width: 599px)">
